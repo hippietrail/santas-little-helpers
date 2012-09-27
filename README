@@ -1,0 +1,6 @@
+Movable Log Window script
+by Joakim "Alendri" Johansson 2012
+
+Dependencies: jQuery
+
+Script to create a log window that is moveable and it scrolls to add more lines as you log to it.
