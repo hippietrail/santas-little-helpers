@@ -38,7 +38,7 @@
 	*/
 	
 	
-	function sendToLog(msg) { if ($('.floatingLogWindow').length == 0) { newLogWindow({message:msg}); } else { sendToSLog($(".floatingLogWindow:last").prop('id'),msg); }};
+	function sendToLog(msg) { if ($('.floatingLogWindow').length == 0) { newLogWindow({message:msg}); } else { sendToSLog($(".floatingLogWindow").length,msg); }};
 	function sendToSLog(id,msg) {
 		var logView = (id.toString().match(/^([1-9][0-9]{0,1})$/)) ? $(".logWindowViewer","#floatingLogWindow" + id) : $(".logWindowViewer","#floatingLogWindow"+id);
 		logView.append("<div style='border-bottom:1px dashed grey'>" + msg + "</div>");
