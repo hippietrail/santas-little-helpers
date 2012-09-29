@@ -6,7 +6,7 @@
 </head>
 
 <body>
- <div id="btn" style="width:100px;height:50px; background-color:red;">Click me</div>
+ <div id="btn" style="width:300px;height:50px; background-color:red;">Click me to send a message to last created log window. If no log is created a new one will be.</div>
 <script id="jqs" type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script language="javascript" type="text/javascript">
 	
@@ -18,38 +18,68 @@
 	});
 	
 	
-	
 	/*	-Movable Log Window script by Joakim "Alendri" Johansson 2012
 		-- Dependencies: jQuery
 		-- newLogWindow() Function used to create a new movable log window. You can specify arguments as newLogWindow({argument:"value",argument2:"value2"...}). Possible arguments are:
-			rows		The number of rows of text to display in the log window. Possible values: 1-99, ex: "5" or 5.
-			textSize	Size of the font in pixels. Possible values: 1-99, ex: "12px" or "12" or 12.
-			height		Height of the window, if specified it overrules the 'rows' attribute. Possible values: 1-999, ex: "300px" or "300" or 300.
-			width		Width of the window. Possible values: 1-999, ex: "300px" or "300" or 300.
+			rows		The number of rows of text to display in the log window. 
+				-Possible values: 1-99, ex: "8" or 8.
+				Default: 5
+			textSize	Size of the font in pixels. 
+				-Possible values: 1-99, ex: "12px" or "12" or 12.
+				Default: 12px
+			height		Height of the window, if specified it overrules the 'rows' attribute. 
+				-Possible values: 1-999, ex: "300px" or "300" or 300.
+				Default: [none] (calculated from the number of rows)
+			width		Width of the window. 
+				-Possible values: 1-999, ex: "300px" or "300" or 300.
+				Default: 350px
+			message		A message to be automatically added once the window is initiated. 
+				-Possible values: a string, ex: "First line in the log."
+				Default: [none]
+			id			A custom id for the window. Cannot begin with a number. 
+				-Possible values: a string, ex: "myCustomID"
+				Default: [none]
+			top			The number of pixels from the top edge of the window to position the log window. 
+				-Possible values: 1-9999, ex: "666px" or "666" or 666.
+				Default: 10 pixels from the right edge of the window.
+			left		The number of pixels from the left edge of the window to position the log window. 
+				-Possible values: 1-9999, ex: "666px" or "666" or 666.
+				Default: 10 pixels from the bottom of the window.
 		
-		-- sendToLog() send your message to the log window, adding a new row to the window. Ex: sendToLog("This is worthy of logging")
+		-- sendToLog( message ) send your message to the last created log window, adding a new row to the window. If no log window is present a new one will be created with default values. 
+			Possible values for message: a string.
+				Ex: sendToLog("This is worthy of logging")
+				
+		-- sendToSLog( id, message ) send your message specific log window, adding a new row to the window.
+			Possible values for id: number 1-99, a string. The number corespond to the order in which the logs were created if no custom id was supplied. For custom id this has to be a string. 
+			Possible values for message: a string. 
+				Ex: sendToSLog("myCustomID","This is worthy of logging")
 	*/
 	
 	
-	function sendToLog(msg) { var id = $(".floatingLogWindow:last").prop('id'); sendToSLog(id,msg);};
+	function sendToLog(msg) { if ($('.floatingLogWindow').length == 0) { newLogWindow({message:msg}); } else { sendToSLog($(".floatingLogWindow").length,msg); }};
 	function sendToSLog(id,msg) {
-		var logView = $(".logWindowViewer","#"+id);
+		var logView = (id.toString().match(/^([1-9][0-9]{0,1})$/)) ? $(".logWindowViewer","#floatingLogWindow" + id) : $(".logWindowViewer","#floatingLogWindow"+id);
 		logView.append("<div style='border-bottom:1px dashed grey'>" + msg + "</div>");
 		logView.animate({ scrollTop: logView.prop("scrollHeight") },1500);
 	};
 	function newLogWindow(args) {
 		var textSize = (args.textSize) ? (args.textSize.toString().match(/^([1-9][0-9]{0,1})/)) ? parseInt(args.textSize.toString().split(/^([1-9][0-9]{0,2})/,2)[1]) : 12 : 12;
-		var rowCount = (args.rows) ? (args.rows.toString().match(/^([1-9][0-9]{0,1})$/)) ? parseInt(args.rows) : 4 : 4;
+		var rowCount = (args.rows) ? (args.rows.toString().match(/^([1-9][0-9]{0,1})$/)) ? parseInt(args.rows) : 5 : 5;
 		var height = (args.height) ? (args.height.toString().match(/^([1-9][0-9]{0,2})/)) ? parseInt(args.height.toString().split(/^([1-9][0-9]{0,2})/,2)[1]) : 0 : 0;
-		var width = (args.width) ? (args.width.toString().match(/^([1-9][0-9]{0,2})/)) ? parseInt(args.width.toString().split(/^([1-9][0-9]{0,2})/,2)[1]) : 300 : 300;
-		var newId = 'floatingLogWindow' + ($('.floatingLogWindow').length + 1);
-		var $newLog = $('<div id="' + newId + '" class="floatingLogWindow"><div class="logWindowViewer"></div><div class="logWindowDragBar" style="background-color:rgb(250,220,180);text-align:center;position:absolute;top:0px;width:100%;cursor:default;">Movable Log Window</div></div>');
 		height = (height==0) ? Math.round((rowCount+1)*(textSize*1.3)) : height + Math.round(textSize*1.3);
+		var width = (args.width) ? (args.width.toString().match(/^([1-9][0-9]{0,2})/)) ? parseInt(args.width.toString().split(/^([1-9][0-9]{0,2})/,2)[1]) : 370 : 370;
+		var leftPos = (args.left) ? (args.left.toString().match(/^([1-9][0-9]{0,3})/)) ? parseInt(args.left.toString().split(/^([1-9][0-9]{0,3})/,2)[1]) : $(window).width() - width - 10 : $(window).width() - width - 10;
+		var topPos = (args.top) ? (args.top.toString().match(/^([1-9][0-9]{0,3})/)) ? parseInt(args.top.toString().split(/^([1-9][0-9]{0,3})/,2)[1]) : $(window).height() - height - 10 : $(window).height() - height - 10;
+		console.log($(window).height() + " " + topPos);
+		var newId = (args.id) ? (args.id.toString().match(/^[^0-9]/)) ? 'floatingLogWindow' + args.id : 'floatingLogWindow' + ($('.floatingLogWindow').length + 1) : 'floatingLogWindow' + ($('.floatingLogWindow').length + 1);
+		var $newLog = $('<div id="' + newId + '" class="floatingLogWindow"><div class="logWindowViewer"></div><div class="logWindowDragBar" style="background-color:rgb(250,220,180);text-align:center;position:absolute;top:0px;width:100%;cursor:default;">Movable Log Window</div></div>');
 		$('body').append($newLog);
-		$($newLog).css({width:width+"px",height:height+"px",position:"fixed",backgroundColor:"white",boxShadow:"0px 0px 4px 0px rgb(150, 0, 0)",borderRadius:"4px",lineHeight:Math.round(textSize*1.3)+"px",fontSize:textSize+"px",paddingBottom:"2px",overflowX:"hidden",fontFamily:"arial"});
+		$($newLog).css({width:width+"px",height:height+"px",position:"fixed",backgroundColor:"white",boxShadow:"0px 0px 4px 0px rgb(150, 0, 0)",borderRadius:"4px",lineHeight:Math.round(textSize*1.3)+"px",fontSize:textSize+"px",paddingBottom:"2px",overflowX:"hidden",fontFamily:"arial",left:leftPos + "px",top:topPos + "px"});
 		$(".logWindowDragBar",$newLog).draggit($newLog);
 		var logView = $(".logWindowViewer",$newLog);
 		logView.css({bottom:"0px",position:"absolute",width:"100%",height:Math.round(rowCount*(textSize*1.3)),overflowY:"scroll"});
+		if (args.message) { sendToSLog(newId,args.message) };
 	};
 	
 	/* PlugTrade.com - jQuery draggit Function - modified by Joakim "Alendri" Johansson */
